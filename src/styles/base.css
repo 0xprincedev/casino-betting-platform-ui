@@ -1,0 +1,26 @@
+div,
+button,
+input,
+a,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span {
+	@apply transition-all duration-200 ease-in-out;
+}
+
+.container {
+	@apply px-16 md:px-8 sm:px-4;
+}
+
+.MuiModal-root {
+	@apply flex items-center justify-center;
+}
+
+.modal__content {
+	@apply relative mx-4 w-full max-w-lg rounded bg-background p-6;
+}
