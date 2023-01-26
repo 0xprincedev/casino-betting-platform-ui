@@ -11,6 +11,7 @@ interface Props {
 	meta: any
 	label?: string
 	name?: string
+	helperText?: string
 	required?: boolean
 	rows?: number
 	pipe?: (arg: string | number) => void
@@ -20,16 +21,20 @@ const InputForm = (props: Props) => {
 	const {
 		component = 'input',
 		variant = 'outlined',
+		meta,
 		type = 'text',
 		input,
 		label,
 		name,
+		helperText = '',
 		required,
 		rows,
 		pipe,
 	} = props
 
 	const [showPassword, setShowPassword] = useState<boolean>(false)
+
+	const hasError = (meta.error || meta.submitError) && meta.touched
 
 	const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
 		input.onChange(pipe ? pipe(event.target.value) : event.target.value)
@@ -42,6 +47,8 @@ const InputForm = (props: Props) => {
 			type={showPassword ? 'text' : type}
 			label={label}
 			name={name}
+			helperText={helperText}
+			error={hasError}
 			required={required}
 			multiline={component === 'textarea'}
 			rows={rows}
@@ -62,7 +69,6 @@ const InputForm = (props: Props) => {
 						<></>
 					),
 			}}
-			{...props}
 		/>
 	)
 }
