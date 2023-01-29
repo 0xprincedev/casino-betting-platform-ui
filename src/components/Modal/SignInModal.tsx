@@ -1,32 +1,63 @@
+import { useState } from 'react'
 import { Field, Form } from 'react-final-form'
-import { Button, IconButton, Modal } from '@mui/material'
+import { toast } from 'react-toastify'
+import IconButton from '@mui/material/IconButton'
+import Modal from '@mui/material/Modal'
+import LoadingButton from '@mui/lab/LoadingButton'
 import CloseIcon from '@mui/icons-material/Close'
-import GoogleIcon from '@mui/icons-material/Google'
+// import GoogleIcon from '@mui/icons-material/Google'
 
+import { useAppDispatch } from 'app/hooks'
+import { setSignIn } from 'slices/user'
+import axios, { setAuthToken } from 'utils/axios'
+import { setUserToLocalStorage } from 'utils'
 import InputForm from 'components/Form/InputForm'
 
 interface Props {
 	open: boolean
 	closeModal: () => void
+	onRequestSignUp: () => void
 }
 
 const SignInModal = (props: Props) => {
-	const { open, closeModal } = props
+	const { open, closeModal, onRequestSignUp } = props
+	const [isFetching, setIsFetching] = useState<boolean>(false)
+	const dispatch = useAppDispatch()
 
-	const handleSignIn = (val: any) => {
-		console.log(val)
+	const handleSignIn = async (val: any) => {
+		const { email, password } = val
+
+		setIsFetching(true)
+
+		try {
+			const { data } = await axios.post('/auth/sign-in', { email, password })
+			setUserToLocalStorage(data.token, data.user.username, data.user.email, data.user.role)
+			setAuthToken(data.token)
+			toast.success(`Welcome ${data.user.username}!`)
+			dispatch(setSignIn(true))
+			closeModal()
+		} catch (err: any) {
+			const { data, status } = err.response
+			if (status === 403) {
+				toast.error(data.message + ': ' + data.error[0].msg)
+			} else {
+				toast.error(data.message)
+			}
+		}
+
+		setIsFetching(false)
 	}
 
-	const handleLoginWithGoogle = () => {
-		console.log('123')
-	}
+	// const handleLoginWithGoogle = () => {
+	// 	console.log('123')
+	// }
 
 	const handleForgotPassword = () => {
 		console.log('123')
 	}
 
 	const handleRegisterAccount = () => {
-		console.log('123')
+		onRequestSignUp()
 	}
 
 	return (
@@ -48,13 +79,13 @@ const SignInModal = (props: Props) => {
 							<Field name="password" label="Password" required>
 								{(props) => <InputForm type="password" {...props} />}
 							</Field>
-							<Button type="submit" variant="contained">
-								Sign In
-							</Button>
+							<LoadingButton loading={isFetching} variant="contained" type="submit">
+								<span>Sign In</span>
+							</LoadingButton>
 						</form>
 					)}
 				/>
-				<div className="relative mt-4 flex items-center justify-center gap-2">
+				{/* <div className="relative mt-4 flex items-center justify-center gap-2">
 					<div className="h-px w-24 bg-primary" />
 					OR
 					<div className="h-px w-24 bg-primary" />
@@ -64,7 +95,7 @@ const SignInModal = (props: Props) => {
 					onClick={handleLoginWithGoogle}
 				>
 					<GoogleIcon />
-				</div>
+				</div> */}
 				<div className="mx-auto mt-4 flex justify-center">
 					<p
 						className="cursor-pointer text-sm font-medium text-primary hover:text-white"

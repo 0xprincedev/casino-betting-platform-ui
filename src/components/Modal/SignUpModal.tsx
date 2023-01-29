@@ -1,28 +1,58 @@
+import { useState } from 'react'
 import { Field, Form } from 'react-final-form'
-import { Button, IconButton, Modal } from '@mui/material'
+import { toast } from 'react-toastify'
+import IconButton from '@mui/material/IconButton'
+import Modal from '@mui/material/Modal'
+import LoadingButton from '@mui/lab/LoadingButton'
 import CloseIcon from '@mui/icons-material/Close'
-import GoogleIcon from '@mui/icons-material/Google'
+// import GoogleIcon from '@mui/icons-material/Google'
 
+import axios from 'utils/axios'
 import InputForm from 'components/Form/InputForm'
 
 interface Props {
 	open: boolean
 	closeModal: () => void
+	onRequestSignIn: () => void
 }
 
 const SignUpModal = (props: Props) => {
-	const { open, closeModal } = props
+	const { open, closeModal, onRequestSignIn } = props
+	const [isFetching, setIsFetching] = useState<boolean>(false)
 
-	const handleSignUp = (val: any) => {
-		console.log(val)
+	const handleSignUp = async (val: any) => {
+		const { email, username, password } = val
+
+		if (username.length < 3) {
+			toast.error('Username must be at least 3 characters long')
+			return
+		}
+		if (password.length < 6) {
+			toast.error('Password must be at least 6 characters long')
+			return
+		}
+		setIsFetching(true)
+		try {
+			await axios.post('/auth/sign-up', { email, username, password })
+			toast.success('Successfully created a new account')
+			onRequestSignIn()
+		} catch (err: any) {
+			const { data, status } = err.response
+			if (status === 403) {
+				toast.error(data.message + ': ' + data.error[0].msg)
+			} else {
+				toast.error(data.message)
+			}
+		}
+		setIsFetching(false)
 	}
 
-	const handleSignUpWithGoogle = () => {
-		console.log('123')
-	}
+	// const handleSignUpWithGoogle = () => {
+	// 	console.log('123')
+	// }
 
-	const handleSignIn = () => {
-		console.log('123')
+	const handleRequestSignIn = () => {
+		onRequestSignIn()
 	}
 
 	return (
@@ -55,13 +85,13 @@ const SignUpModal = (props: Props) => {
 									/>
 								)}
 							</Field>
-							<Button type="submit" variant="contained">
+							<LoadingButton type="submit" variant="contained" loading={isFetching}>
 								Sign Up
-							</Button>
+							</LoadingButton>
 						</form>
 					)}
 				/>
-				<div className="relative mt-4 flex items-center justify-center gap-2">
+				{/* <div className="relative mt-4 flex items-center justify-center gap-2">
 					<div className="h-px w-24 bg-primary" />
 					OR
 					<div className="h-px w-24 bg-primary" />
@@ -71,10 +101,10 @@ const SignUpModal = (props: Props) => {
 					onClick={handleSignUpWithGoogle}
 				>
 					<GoogleIcon />
-				</div>
+				</div> */}
 				<p className="mt-4 text-center text-sm">
 					<small>Already have an account?</small>{' '}
-					<span className="cursor-pointer font-medium underline" onClick={handleSignIn}>
+					<span className="cursor-pointer font-medium underline" onClick={handleRequestSignIn}>
 						Sign In
 					</span>
 				</p>

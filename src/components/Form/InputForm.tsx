@@ -1,5 +1,7 @@
 import { ChangeEvent, useState } from 'react'
-import { IconButton, InputAdornment, TextField } from '@mui/material'
+import IconButton from '@mui/material/IconButton'
+import InputAdornment from '@mui/material/InputAdornment'
+import TextField from '@mui/material/TextField'
 import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
 
@@ -21,7 +23,6 @@ const InputForm = (props: Props) => {
 	const {
 		component = 'input',
 		variant = 'outlined',
-		meta,
 		type = 'text',
 		input,
 		label,
@@ -33,8 +34,6 @@ const InputForm = (props: Props) => {
 	} = props
 
 	const [showPassword, setShowPassword] = useState<boolean>(false)
-
-	const hasError = (meta.error || meta.submitError) && meta.touched
 
 	const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
 		input.onChange(pipe ? pipe(event.target.value) : event.target.value)
@@ -48,7 +47,6 @@ const InputForm = (props: Props) => {
 			label={label}
 			name={name}
 			helperText={helperText}
-			error={hasError}
 			required={required}
 			multiline={component === 'textarea'}
 			rows={rows}
