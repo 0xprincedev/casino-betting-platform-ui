@@ -7,35 +7,35 @@ import LoadingButton from '@mui/lab/LoadingButton'
 import CloseIcon from '@mui/icons-material/Close'
 // import GoogleIcon from '@mui/icons-material/Google'
 
-import { useAppDispatch } from 'app/hooks'
-import { setSignIn } from 'slices/user'
-import axios, { setAuthToken } from 'utils/axios'
-import { setUserToLocalStorage } from 'utils'
+import axios from 'utils/axios'
 import InputForm from 'components/Form/InputForm'
 
 interface Props {
 	open: boolean
 	closeModal: () => void
-	onRequestSignUp: () => void
+	onRequestSignIn: () => void
 }
 
-const SignInModal = (props: Props) => {
-	const { open, closeModal, onRequestSignUp } = props
+const SignUpModal = (props: Props) => {
+	const { open, closeModal, onRequestSignIn } = props
 	const [isFetching, setIsFetching] = useState<boolean>(false)
-	const dispatch = useAppDispatch()
 
-	const handleSignIn = async (val: any) => {
-		const { email, password } = val
+	const handleSignUp = async (val: any) => {
+		const { email, username, password } = val
 
+		if (username.length < 3) {
+			toast.error('Username must be at least 3 characters long')
+			return
+		}
+		if (password.length < 6) {
+			toast.error('Password must be at least 6 characters long')
+			return
+		}
 		setIsFetching(true)
-
 		try {
-			const { data } = await axios.post('/auth/sign-in', { email, password })
-			setUserToLocalStorage(data.token, data.user.username, data.user.email, data.user.role)
-			setAuthToken(data.token)
-			toast.success(`Welcome ${data.user.username}!`)
-			dispatch(setSignIn(true))
-			closeModal()
+			await axios.post('/auth/sign-up', { email, username, password })
+			toast.success('Successfully created a new account')
+			onRequestSignIn()
 		} catch (err: any) {
 			const { data, status } = err.response
 			if (status === 403) {
@@ -44,20 +44,15 @@ const SignInModal = (props: Props) => {
 				toast.error(data.message)
 			}
 		}
-
 		setIsFetching(false)
 	}
 
-	// const handleLoginWithGoogle = () => {
+	// const handleSignUpWithGoogle = () => {
 	// 	console.log('123')
 	// }
 
-	const handleForgotPassword = () => {
-		console.log('123')
-	}
-
-	const handleRegisterAccount = () => {
-		onRequestSignUp()
+	const handleRequestSignIn = () => {
+		onRequestSignIn()
 	}
 
 	return (
@@ -68,19 +63,30 @@ const SignInModal = (props: Props) => {
 						<CloseIcon fontSize="small" />
 					</IconButton>
 				</div>
-				<h1 className="title text-center font-medium">Sign In</h1>
+				<h1 className="title text-center font-medium">Sign Up</h1>
 				<Form
-					onSubmit={handleSignIn}
+					onSubmit={handleSignUp}
 					render={({ handleSubmit }) => (
 						<form onSubmit={handleSubmit} autoComplete="off" className="mt-8 grid gap-6">
 							<Field name="email" label="E-mail" required>
 								{(props) => <InputForm type="email" {...props} />}
 							</Field>
-							<Field name="password" label="Password" required>
-								{(props) => <InputForm type="password" {...props} />}
+							<Field name="username" label="Username" required>
+								{(props) => (
+									<InputForm helperText="Username must be at least 3 characters long" {...props} />
+								)}
 							</Field>
-							<LoadingButton loading={isFetching} variant="contained" type="submit">
-								<span>Sign In</span>
+							<Field name="password" label="Password" required>
+								{(props) => (
+									<InputForm
+										type="password"
+										helperText="Password must be at least 6 characters long"
+										{...props}
+									/>
+								)}
+							</Field>
+							<LoadingButton type="submit" variant="contained" loading={isFetching}>
+								Sign Up
 							</LoadingButton>
 						</form>
 					)}
@@ -92,22 +98,14 @@ const SignInModal = (props: Props) => {
 				</div>
 				<div
 					className="mx-auto mt-2 flex h-10 w-28 cursor-pointer items-center justify-center rounded bg-secondary"
-					onClick={handleLoginWithGoogle}
+					onClick={handleSignUpWithGoogle}
 				>
 					<GoogleIcon />
 				</div> */}
-				<div className="mx-auto mt-4 flex justify-center">
-					<p
-						className="cursor-pointer text-sm font-medium text-primary hover:text-white"
-						onClick={handleForgotPassword}
-					>
-						Forgot Password
-					</p>
-				</div>
 				<p className="mt-4 text-center text-sm">
-					<small>Don't have an account?</small>{' '}
-					<span className="cursor-pointer font-medium underline" onClick={handleRegisterAccount}>
-						Register an Account
+					<small>Already have an account?</small>{' '}
+					<span className="cursor-pointer font-medium underline" onClick={handleRequestSignIn}>
+						Sign In
 					</span>
 				</p>
 			</div>
@@ -115,4 +113,4 @@ const SignInModal = (props: Props) => {
 	)
 }
 
-export default SignInModal
+export default SignUpModal

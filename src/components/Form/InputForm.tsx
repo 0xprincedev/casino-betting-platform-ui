@@ -1,5 +1,7 @@
 import { ChangeEvent, useState } from 'react'
-import { IconButton, InputAdornment, TextField } from '@mui/material'
+import IconButton from '@mui/material/IconButton'
+import InputAdornment from '@mui/material/InputAdornment'
+import TextField from '@mui/material/TextField'
 import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
 
@@ -11,6 +13,7 @@ interface Props {
 	meta: any
 	label?: string
 	name?: string
+	helperText?: string
 	required?: boolean
 	rows?: number
 	pipe?: (arg: string | number) => void
@@ -24,6 +27,7 @@ const InputForm = (props: Props) => {
 		input,
 		label,
 		name,
+		helperText = '',
 		required,
 		rows,
 		pipe,
@@ -42,6 +46,7 @@ const InputForm = (props: Props) => {
 			type={showPassword ? 'text' : type}
 			label={label}
 			name={name}
+			helperText={helperText}
 			required={required}
 			multiline={component === 'textarea'}
 			rows={rows}
@@ -62,7 +67,6 @@ const InputForm = (props: Props) => {
 						<></>
 					),
 			}}
-			{...props}
 		/>
 	)
 }
